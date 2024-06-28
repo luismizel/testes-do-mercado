@@ -34,7 +34,12 @@ def op1():
         home()
 
 def op2():
-    print("Opção 2 selecionada: Já tenho uma conta")
+    arq = open('contas.txt')
+    efetuar_login = ("efetue seu login")
+    print (f"{efetuar_login}")
+    nome_login = input('Digite o nome do usuario cadastrado: ')
+
+    contas = arq.
     home()
 
 def op3():
