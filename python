@@ -1,34 +1,47 @@
-nome_mercado = ("Bem Vindo ao Mercado Clube da Esquina")
+def home():
+    nome_mercado = "Bem Vindo ao Mercado Clube da Esquina"
+    print(f"{nome_mercado}")
 
+    laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Excluir conta. 4. Ver catálogo.\n")
+    if laal == "1":
+        op1()
+    elif laal == "2":
+        op2()
+    elif laal == "3":
+        op3()
+    elif laal == "4":
+        op4()
+    else:
+        home()
 
-print (f"{nome_mercado}")
-
-laal = input("1. Criar conta. 2. Ja tenho uma conta. 3 excluir conta. 4 Ver catalogo.\n")
-if laal == "1":
-   op1()
-elif laal == "2":
-   op2()
-elif laal == "3":
-   op3()
-elif laal == "4":
-   op4()
-else:
-   home()
 def op1():
-    arq = open ('contas.txt', 'a')
-    criarConta = ("vamos criar sua conta\n")
-    print (f"{criarConta}")
-    nome = input ("Digite seu nome:\n")
-    idade = input("Dihite sua idade:\n")
+    print("Vamos criar sua conta\n")
+    nome = input("Digite seu nome:\n")
+    idade = input("Digite sua idade:\n")
     cpf = input("Qual o seu CPF:\n")
-    arq.write('{}, {}, {}\n'.format(nome, idade, CPF))
+    email = input("Informe o seu Email:\n")
+    
     con = input("Confirmar? (s/n)\n")
     if con == "n":
-        cancelamemto = ("você cancelou o procedimento")
-        print (f"{cancelamento}")
-        arq.close()
+        cancelamento = "Você cancelou o procedimento"
+        print(f"{cancelamento}")
         home()
     elif con == "s":
-        sucesso = ("Parabens voce concluiu seu registro")
-        print (f"{sucesso}")
-        
+        with open('contas.txt', 'a') as arq:
+            arq.write(f'{nome}, {idade}, {cpf}, {email}\n')
+        sucesso = "Parabéns, você concluiu seu registro"
+        print(f"{sucesso}")
+        home()
+
+def op2():
+    print("Opção 2 selecionada: Já tenho uma conta")
+    home()
+
+def op3():
+    print("Opção 3 selecionada: Excluir conta")
+    home()
+
+def op4():
+    print("Opção 4 selecionada: Ver catálogo")
+    home()
+home()
