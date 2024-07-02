@@ -2,7 +2,7 @@ def home():
     nome_mercado = "Bem Vindo ao Mercado Clube da Esquina"
     print(f"{nome_mercado}")
 
-    laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Excluir conta. 4. Ver catálogo.\n")
+    laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Ver Catálogo . 4. Adicionar produto ao carrinho.\n")
     if laal == "1":
         op1()
     elif laal == "2":
@@ -39,14 +39,14 @@ def op2():
     print (f"{efetuar_login}")
     nome_login = input('Digite o nome do usuario cadastrado: ')
 
-    contas = arq.
     home()
 
 def op3():
-    print("Opção 3 selecionada: Excluir conta")
+    print("Opção 3 selecionada: Ver catálogo")
+    Lista_de_produtos ["Banana kg 5.33","macarrão 4.51" ,"Arroz 1kg 12.00","Maçã kg 13.98","Contra filé 59.98","feijão 1kg 22.50"]
     home()
 
 def op4():
-    print("Opção 4 selecionada: Ver catálogo")
+    print("Opção 4 selecionada: Adicionar produto ao carrinho")
     home()
 home()
