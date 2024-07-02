@@ -2,7 +2,7 @@ def home():
     nome_mercado = "Bem Vindo ao Mercado Clube da Esquina"
     print(f"{nome_mercado}")
 
-    laal = input("1. Criar conta.\n2. Já tenho uma conta.\n3. ver catalogo.\n4. carrinho de compras.\n")
+    laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Ver Catálogo . 4. Adicionar produto ao carrinho.\n")
     if laal == "1":
         op1()
     elif laal == "2":
@@ -38,21 +38,28 @@ def op2():
     efetuar_login = ("efetue seu login")
     print (f"{efetuar_login}")
     nome_login = input('Digite o nome do usuario cadastrado: ')
-    cpf_usuario = input('Informe eu cpf: ')
-    
-    contas = arq.readlines()
-    if nome_login + '\n' in contas:
-        print ('bem vindo, {}'.format(nome_login))
+
     home()
 
 def op3():
     print("Opção 3 selecionada: Ver catálogo")
-    mercearia = "Arroz 1kg 5.70\nFeijão 1kg 8.55\nAçúcar 1kg 5.00\nFarinha de trigo 1kg 4.00\nÓleo de cozinha 1kg 5.99\nSal 1kg 3.50\nCafé 1kg 17.30\nMacarrão 5.00\nMolho de tomate 4.50\n"
-    print(f"{mercearia}")
+    Lista_De_Produtos = ("Banana kg 5.33\n macarrão 4.51\n Arroz 1kg 12.00\n Maçã kg 13.98\n Contra filé 59.98\n feijão 1kg 22.50\n")
     home()
 
 def op4():
-    print("Opção 4 selecionada: carrinho de compras")
-    
-    home()
+    print("Opção 4 selecionada: Adicionar produto ao carrinho")
+    produtos = []
+    produ = input("\n")
+    produtos.append(produ)
+    print(produtos)
+
+    while True:
+    produtos = input("Digite o nome do produto (ou 'sair' para parar): ")
+    if produ.lower() == 'n':
+        break
+    produtos.append(produtos)
+        print("Produtos adicionados:")
+for product in my_list:
+    print(product)
+        home()
 home()
