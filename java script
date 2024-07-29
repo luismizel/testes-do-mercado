@@ -1,0 +1,130 @@
+const readline = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+const listaDeProdutos = {
+  'Banana': 5.33,
+  'Macarrão': 4.51,
+  'Arroz': 12.00,
+  'Maçã': 13.98,
+  'Contra filé': 59.98,
+  'Feijão': 22.50
+};
+
+let produtos = {};
+
+function home() {
+  console.log("Bem Vindo ao Mercado Clube da Esquina");
+  console.log("1. Criar conta.");
+  console.log("2. Já tenho uma conta.");
+  console.log("3. Ver Catálogo.");
+  console.log("4. Adicionar produto ao carrinho.");
+  
+  readline.question('Escolha uma opção: ', (opcao) => {
+    switch (opcao) {
+      case '1':
+        op1();
+        break;
+      case '2':
+        op2();
+        break;
+      case '3':
+        op3();
+        break;
+      case '4':
+        op4();
+        break;
+      default:
+        home();
+    }
+  });
+}
+
+function op1() {
+  console.log("Vamos criar sua conta");
+  
+  readline.question('Digite seu nome: ', (nome) => {
+    readline.question('Digite sua idade: ', (idade) => {
+      readline.question('Qual o seu CPF: ', (cpf) => {
+        readline.question('Informe o seu Email: ', (email) => {
+          console.log(`Confirmar? (s/n)`);
+          readline.question('', (con) => {
+            if (con.toLowerCase() === 's') {
+             
+              console.log("Parabéns, você concluiu seu registro");
+              home();
+            } else {
+              console.log("Você cancelou o procedimento");
+              home();
+            }
+          });
+        });
+      });
+    });
+  });
+}
+
+
+function op2() {
+  console.log("Efetue seu login");
+  
+  readline.question('Digite o nome do usuario cadastrado: ', (nomeLogin) => {
+    
+    home();
+  });
+}
+
+
+function op3() {
+  console.log("Opção 3 selecionada: Ver catálogo");
+  for (const [key, value] of Object.entries(listaDeProdutos)) {
+    console.log(`${key}: ${value}`);
+  }
+  home();
+}
+
+
+function op4() {
+  console.log("Opção 4 selecionada: Adicionar/Excluir produto produto ao carrinho");
+  
+  function adicionarProduto() {
+    readline.question('Adicione um produto, (\'E\' para exluir, \'V\' para voltar e \'T\' para terminar): ', (produto) => {
+      if (produto.toUpperCase() === 'E') {
+        console.log(produtos);
+        readline.question('Excluir produtos(ou \'V\' para voltar): ', (exc) => {
+          if (exc in produtos) {
+            delete produtos[exc];
+            console.log("Seu carrinho:");
+            for (const [key, value] of Object.entries(produtos)) {
+              console.log(`${key}: ${value}`);
+            }
+          } else if (exc.toUpperCase() === 'V') {
+            adicionarProduto();
+          }
+        });
+      } else if (produto in listaDeProdutos) {
+        produtos[produto] = listaDeProdutos[produto];
+        console.log("SUA LISTA:");
+        for (const [key, value] of Object.entries(produtos)) {
+          console.log(`${key}: ${value}`);
+        }
+        adicionarProduto();
+      } else if (produto.toUpperCase() === 'V') {
+        home();
+      } else if (produto.toUpperCase() === 'T') {
+        const total = Object.values(produtos).reduce((a, b) => a + b, 0);
+        console.log(`Total: ${total.toFixed(2)}`);
+        home();
+      } else {
+        console.log("\nPRODUTO NÃO ENCONTRADO!");
+        adicionarProduto();
+      }
+    });
+  }
+
+  adicionarProduto();
+}
+
+
+home();
