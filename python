@@ -1,6 +1,8 @@
+produtos = {}
+Lista_De_Produtos = {'Banana': 5.33, 'Macarrão': 4.51, 'Arroz': 12.00, 'Maçã': 13.98, 'Contra filé': 59.98, 'Feijão': 22.50}
 def home():
     nome_mercado = "Bem Vindo ao Mercado Clube da Esquina"
-    print(f"{nome_mercado}")
+    print(f"\n{nome_mercado}")
 
     laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Ver Catálogo . 4. Adicionar produto ao carrinho.\n")
     if laal == "1":
@@ -38,28 +40,39 @@ def op2():
     efetuar_login = ("efetue seu login")
     print (f"{efetuar_login}")
     nome_login = input('Digite o nome do usuario cadastrado: ')
-
     home()
 
 def op3():
-    print("Opção 3 selecionada: Ver catálogo")
-    Lista_De_Produtos = ("Banana kg 5.33\n macarrão 4.51\n Arroz 1kg 12.00\n Maçã kg 13.98\n Contra filé 59.98\n feijão 1kg 22.50\n")
+    print("Opção 3 selecionada: Ver catálogo\n")
+    for key, value in Lista_De_Produtos.items():
+        print(f"{key}: {value}")
     home()
-
 def op4():
-    print("Opção 4 selecionada: Adicionar produto ao carrinho")
-    produtos = []
-    produ = input("\n")
-    produtos.append(produ)
-    print(produtos)
-
+    print("Opção 4 selecionada: Adicionar/Excluir produto produto ao carrinho")
     while True:
-    produtos = input("Digite o nome do produto (ou 'sair' para parar): ")
-    if produ.lower() == 'n':
-        break
-    produtos.append(produtos)
-        print("Produtos adicionados:")
-for product in my_list:
-    print(product)
-        home()
+        produto = input("Adicione um produto, ('E' para exluir, 'V' para voltar e 'T' para terminar):\n")
+        if produto.upper() == "E":
+            print(produtos)
+            while True:
+                exc = input("Excluir produtos(ou 'V' para voltar):\n")
+                if exc.capitalize() in produtos:
+                    del produtos[exc.capitalize()]
+                    print("Seu carrinho:")
+                    for key, value in produtos.items():
+                        print(f"{key}: {value}")
+                elif exc.upper() == "V":
+                    break
+        elif produto.capitalize() in Lista_De_Produtos:
+            produtos[produto.capitalize()] = Lista_De_Produtos[produto.capitalize()]
+            print("SUA LISTA:\n")
+            for key, value in produtos.items():
+                print(f"{key}: {value}")
+        elif produto.upper() == "V":
+            home()
+        elif produto.upper() == "T":
+            total = sum(produtos.values())
+            print(f"Total: {total: .2f}")
+            home()
+        else:
+            print("\nPRODUTO NÃO CATALOGADO\n")
 home()
