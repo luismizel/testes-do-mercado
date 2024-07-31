@@ -40,6 +40,8 @@ def op2():
     efetuar_login = ("efetue seu login")
     print (f"{efetuar_login}")
     nome_login = input('Digite o nome do usuario cadastrado: ')
+    cpf_login = input('Digite o seu cpf cadastrado: ')
+
     home()
 
 def op3():
