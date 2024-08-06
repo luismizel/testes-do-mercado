@@ -1,0 +1,48 @@
+const readline = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+let produtos = [];
+let cadastros = [];
+let historicoCompras = [];
+
+const listaDeProdutos = {
+  'Banana': 5.33,
+  'Macarrão': 4.51,
+  'Arroz': 12.00,
+  'Maçã': 13.98,
+  'Contra filé': 59.98,
+  'Feijão': 22.50,
+  'Coróte': 3.50,
+  'Nugget': 12.50,
+};
+
+let valorTotal = 0;
+
+const perguntarProduto = () => {
+  readline.question('Digite o nome do produto (ou "T" para terminar): ', (produto) => {
+    if (produto.toLowerCase() === 't') {
+      if (produtos.length > 0) {
+        console.log('Produtos encontrados:');
+        for (let item of produtos) {
+          console.log(`${item.nome}: R$ ${item.preco.toFixed(2)}`);
+        }
+        console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
+      } else {
+        console.log('Nenhum produto foi inserido.');
+      }
+      readline.close();
+    } else {
+      if (produto in listaDeProdutos) {
+        valorTotal += listaDeProdutos[produto];
+        produtos.push({ nome: produto, preco: listaDeProdutos[produto] });
+      } else {
+        console.log(`Produto ${produto} não encontrado.`);
+      }
+      perguntarProduto(); 
+    }
+  });
+};
+
+perguntarProduto();
