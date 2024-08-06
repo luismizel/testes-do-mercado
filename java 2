@@ -7,6 +7,18 @@ let produtos = [];
 let cadastros = [];
 let historicoCompras = [];
 
+function carregamentoDados() {
+    try{
+        if (fs.existsSync('produtos.txt')) {
+            produtos = fs.readFileync('produtos.txt', 'utf8').trim().split('/n').map(line => {
+                const [nome,preco] = line.split(' - ');
+                return { nome, preco: parseFloat(preco) }
+            });
+        }
+    }
+}
+
+
 const listaDeProdutos = {
   'Banana': 5.33,
   'Macarrão': 4.51,
