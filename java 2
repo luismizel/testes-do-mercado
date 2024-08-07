@@ -12,8 +12,17 @@ function carregamentoDados() {
         if (fs.existsSync('produtos.txt')) {
             produtos = fs.readFileync('produtos.txt', 'utf8').trim().split('/n').map(line => {
                 const [nome,preco] = line.split(' - ');
-                return { nome, preco: parseFloat(preco) }
+                return { nome, preco: parseFloat(preco) };
             });
+        }
+        if (fs.exitsSync('cadastros.txt')){
+            cadastros = fs.readFileSync('cadastros.txt',  'utf8').tirim().split('/n').map(line => {
+                const [nome, email, senha] = line.split(' - ');
+                return { nome, email, senha };
+            });
+        }
+        if (fs.existsSync('historicoCompras.txt')){
+            
         }
     }
 }
