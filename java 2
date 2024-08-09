@@ -21,12 +21,49 @@ function carregamentoDados() {
                 return { nome, email, senha };
             });
         }
-        if (fs.existsSync('historicoCompras.txt')){
-            
+        if (fs.existsSync('historicoCompras.txt')) {
+            historicoCompras = fs.readFileSync('historicoCompras.txt', 'utf8').trim().split('/n').map(line => { return line;
+            });
         }
+    }catch (error) {
+        console.log('ocorreu um erro ao carregar dados:', error);
     }
 }
 
+function salvarDados() {
+    const produtosData = produtos.map(produto => `${produto.nome} - ${produto.preco.toFixed(2)}`).join('\n');
+    fs.writeFileSync('produtos.txt', produtosData);
+
+    const cadastrosData = cadastros.map(cadastro => `${cadastro.nome} - ${cadastro.email} - ${cadastro.senha}`).join('\n');
+    fs.writeFileSync('cadastros.txt', cadastrosData);
+
+    const historicoData = historicoCompras.join('\n');
+    fs.writeFileSync('historicoCompras.txt', historicoData);
+}
+
+function cadastrarCliente(callback) {
+    rl.question('nome', (nome) => {
+        rl.question('email', (email) => {
+              rl.question('CPF:', (CPF) => {
+                cadastro.push({ nome, email, CPF });
+                callback({ nome, email });
+            });
+        });
+    });
+}
+
+function loginCliente(callback) {
+    rl.question('email: ', (email) => {
+        rl.question('CPF: ', (CPF) => {
+            const cliente = cadastros.find(c => c.email === email && c.CPF === CPF);
+            if (cliente) {
+                console.log('Olá, ${cadastro.nome}!');
+                callback(cliente);
+            }else {
+                console.log('Email ou CPF não correspondem')
+            }
+        }
+    }
 
 const listaDeProdutos = {
   'Banana': 5.33,
