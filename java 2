@@ -1,6 +1,9 @@
-const readline = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
+const fs = require('fs');
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
 });
 
 let produtos = [];
@@ -8,25 +11,24 @@ let cadastros = [];
 let historicoCompras = [];
 
 function carregamentoDados() {
-    try{
+    try {
         if (fs.existsSync('produtos.txt')) {
-            produtos = fs.readFileync('produtos.txt', 'utf8').trim().split('/n').map(line => {
-                const [nome,preco] = line.split(' - ');
+            produtos = fs.readFileSync('produtos.txt', 'utf8').trim().split('\n').map(line => {
+                const [nome, preco] = line.split(' - ');
                 return { nome, preco: parseFloat(preco) };
             });
         }
-        if (fs.exitsSync('cadastros.txt')){
-            cadastros = fs.readFileSync('cadastros.txt',  'utf8').tirim().split('/n').map(line => {
+        if (fs.existsSync('cadastros.txt')) {
+            cadastros = fs.readFileSync('cadastros.txt', 'utf8').trim().split('\n').map(line => {
                 const [nome, email, senha] = line.split(' - ');
                 return { nome, email, senha };
             });
         }
         if (fs.existsSync('historicoCompras.txt')) {
-            historicoCompras = fs.readFileSync('historicoCompras.txt', 'utf8').trim().split('/n').map(line => { return line;
-            });
+            historicoCompras = fs.readFileSync('historicoCompras.txt', 'utf8').trim().split('\n');
         }
-    }catch (error) {
-        console.log('ocorreu um erro ao carregar dados:', error);
+    } catch (error) {
+        console.log('Ocorreu um erro ao carregar dados:', error);
     }
 }
 
@@ -42,10 +44,10 @@ function salvarDados() {
 }
 
 function cadastrarCliente(callback) {
-    rl.question('nome', (nome) => {
-        rl.question('email', (email) => {
-              rl.question('CPF:', (CPF) => {
-                cadastro.push({ nome, email, CPF });
+    rl.question('Nome: ', (nome) => {
+        rl.question('Email: ', (email) => {
+            rl.question('CPF: ', (cpf) => {
+                cadastros.push({ nome, email, cpf });
                 callback({ nome, email });
             });
         });
@@ -53,54 +55,75 @@ function cadastrarCliente(callback) {
 }
 
 function loginCliente(callback) {
-    rl.question('email: ', (email) => {
-        rl.question('CPF: ', (CPF) => {
-            const cliente = cadastros.find(c => c.email === email && c.CPF === CPF);
+    rl.question('Email: ', (email) => {
+        rl.question('CPF: ', (cpf) => {
+            const cliente = cadastros.find(c => c.email === email && c.cpf === cpf);
             if (cliente) {
-                console.log('Olá, ${cadastro.nome}!');
+                console.log(`Olá, ${cliente.nome}!`);
                 callback(cliente);
-            }else {
-                console.log('Email ou CPF não correspondem')
+            } else {
+                console.log('Email ou CPF não correspondem.');
+                menu(); // Assumindo que você tem uma função 'menu' definida em outro lugar.
             }
-        }
-    }
+        });
+    });
+}
 
 const listaDeProdutos = {
-  'Banana': 5.33,
-  'Macarrão': 4.51,
-  'Arroz': 12.00,
-  'Maçã': 13.98,
-  'Contra filé': 59.98,
-  'Feijão': 22.50,
-  'Coróte': 3.50,
-  'Nugget': 12.50,
+    'Banana': 5.33,
+    'Macarrão': 4.51,
+    'Arroz': 12.00,
+    'Maçã': 13.98,
+    'Contra filé': 59.98,
+    'Feijão': 22.50,
+    'Corote': 3.50,
+    'Nugget': 12.50,
 };
 
 let valorTotal = 0;
+let carrinho = {};
 
-const perguntarProduto = () => {
-  readline.question('Digite o nome do produto (ou "T" para terminar): ', (produto) => {
-    if (produto.toLowerCase() === 't') {
-      if (produtos.length > 0) {
-        console.log('Produtos encontrados:');
-        for (let item of produtos) {
-          console.log(`${item.nome}: R$ ${item.preco.toFixed(2)}`);
+function perguntarProduto() {
+    rl.question('Digite o nome do produto (ou "T" para terminar): ', (produto) => {
+        if (produto.toLowerCase() === 't') {
+            if (Object.keys(carrinho).length > 0) {
+                console.log('Produtos no carrinho:');
+                for (let [nome, { preco, quantidade }] of Object.entries(carrinho)) {
+                    console.log(`${nome} (s) R$ ${preco.toFixed(2)} (${quantidade})`);
+                }
+                console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
+            } else {
+                console.log('Nenhum produto foi inserido.');
+            }
+            rl.close();
+        } else {
+            if (produto in listaDeProdutos) {
+                rl.question('Quantidade: ', (quantidade) => {
+                    const quantNumerica = parseInt(quantidade, 10);
+                    if (isNaN(quantNumerica) || quantNumerica <= 0) {
+                        console.log('Quantidade inválida. Tente novamente.');
+                        perguntarProduto();
+                        return;
+                    }
+                    if (carrinho[produto]) {
+                        carrinho[produto].quantidade += quantNumerica;
+                    } else {
+                        carrinho[produto] = {
+                            preco: listaDeProdutos[produto],
+                            quantidade: quantNumerica
+                        };
+                    }
+                    valorTotal += listaDeProdutos[produto] * quantNumerica;
+                    console.log(`${quantNumerica} ${produto}(s) adicionado(s) ao carrinho`);
+                    perguntarProduto();
+                });
+            } else {
+                console.log('Produto não encontrado.');
+                perguntarProduto();
+            }
         }
-        console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
-      } else {
-        console.log('Nenhum produto foi inserido.');
-      }
-      readline.close();
-    } else {
-      if (produto in listaDeProdutos) {
-        valorTotal += listaDeProdutos[produto];
-        produtos.push({ nome: produto, preco: listaDeProdutos[produto] });
-      } else {
-        console.log(`Produto ${produto} não encontrado.`);
-      }
-      perguntarProduto(); 
-    }
-  });
-};
+    });
+}
 
+carregamentoDados();
 perguntarProduto();
