@@ -69,16 +69,27 @@ function loginCliente(callback) {
     });
 }
 
-const listaDeProdutos = {
-    'Banana': 5.33,
-    'Macarrão': 4.51,
-    'Arroz': 12.00,
-    'Maçã': 13.98,
-    'Contra filé': 59.98,
-    'Feijão': 22.50,
-    'Corote': 3.50,
-    'Nugget': 12.50,
-};
+const listaDeProdutos = [
+    { codigo: '1', nome: 'Banana', preco: 5.33 },
+    { codigo: '2', nome: 'Macarrão', preco: 4.51 },
+    { codigo: '3', nome: 'Arroz', preco: 12.00 },
+    { codigo: '4', nome: 'Maçã', preco: 13.98 },
+    { codigo: '5', nome: 'Contra filé', preco: 59.98 },
+    { codigo: '6', nome: 'Feijão', preco: 22.50 },
+    { codigo: '7', nome: 'Corote', preco: 3.50 },
+    { codigo: '8', nome: 'Nugget', preco: 12.50 },
+    {codigo},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    
+];
 
 let valorTotal = 0;
 let carrinho = {};
