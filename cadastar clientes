@@ -1,83 +1,99 @@
-const fs = require('fs');
+output: process.stdoutconst fs = require('fs');
 const readline = require('readline');
 
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
 });
 
 let clientes = [];
 
 // Função para carregar os usuários cadastrados
 function carregarClientes() {
-    if (fs.existsSync('clientes.txt')) {
-        clientes = fs.readFileSync('clientes.txt', 'utf8').trim().split('\n').map(line => {
-            const [nome, CPF] = line.split(' - ');
-            return { nome, CPF };
-        });
+  fs.readFile('clientes.txt', 'utf8', (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        // Arquivo não existe, criar um novo
+        fs.writeFileSync('clientes.txt', '');
+      } else {
+        console.error(err);
+        process.exit(1);
+      }
+    } else {
+      clientes = data.trim().split('\n').map(line => {
+        const [nome, CPF] = line.split(' - ');
+        return { nome, CPF };
+      });
     }
+  });
 }
 
 // Função para salvar os usuários no arquivo
 function salvarClientes() {
-    const ClientesData = clientes.map(cliente => `${cliente.nome} - ${cliente.CPF}`).join('\n');
-    fs.writeFileSync('clientes.txt', ClientesData);
+  const clientesData = clientes.map(cliente => `${cliente.nome} - ${cliente.CPF}`).join('\n');
+  fs.writeFile('clientes.txt', clientesData, err => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
 }
 
 // Função para cadastrar um novo usuário
 function cadastrarCliente(callback) {
-    rl.question('Nome: ', (nome) => {
-        rl.question('CPF: ', (CPF) => {
-            clientes.push({ nome, CPF });
-            salvarClientes();
-            console.log('Cliente cadastrado com sucesso!');
-            callback();
-        });
+  rl.question('Nome: ', nome => {
+    rl.question('CPF: ', CPF => {
+      clientes.push({ nome, CPF });
+      salvarClientes();
+      console.log('Cliente cadastrado com sucesso!');
+      callback();
     });
+  });
 }
 
 // Função para fazer login
 function fazerLogin(callback) {
-    rl.question('Nome: ', (nome) => {
-        rl.question('CPF: ', (CPF) => {
-            const cliente = clientes.find(u => u.nome === nome && u.CPF === CPF);
-            if (cliente) {
-                console.log(`Bem-vindo, ${cliente.nome}!`);
-                callback(cliente);
-            } else {
-                console.log('Nome ou CPF incorretos.');
-                menu();
-            }
-        });
+  rl.question('Nome: ', nome => {
+    rl.question('CPF: ', CPF => {
+      const cliente = clientes.find(u => u.nome === nome && u.CPF === CPF);
+      if (cliente) {
+        console.log(`Bem-vindo, ${cliente.nome}!`);
+        callback(cliente);
+      } else {
+        console.log('Nome ou CPF incorretos.');
+        menu();
+      }
     });
+  });
 }
 
 // Função para mostrar o menu
 function menu() {
-    console.log('Escolha uma opção:');
-    console.log('1. Cadastrar');
-    console.log('2. Login');
-    console.log('3. Sair');
+  console.log('Escolha uma opção:');
+  console.log('1. Cadastrar');
+  console.log('2. Login');
+  console.log('3. Sair');
 
-    rl.question('Opção: ', (opcao) => {
-        switch (opcao) {
-            case '1':
-                cadastrarCliente(menu);
-                break;
-            case '2':
-                fazerLogin(() => {
-                    rl.close();
-                });
-                break;
-            case '3':
-                rl.close();
-                break;
-            default:
-                console.log('Opção inválida.');
-                menu();
-                break;
-        }
-    });
+  rl.question('Opção: ', opcao => {
+    switch (opcao) {
+      case '1':
+        cadastrarCliente(menu);
+        break;
+      case '2':
+        fazerLogin(() => {
+          rl.close();
+        });
+        break;
+      case '3':
+        rl.close();
+        break;
+      default:
+        console.log('Opção inválida.');
+        menu();
+        break;
+    }
+  });
 }
 
 // Inicializa o programa
+carregarClientes();
+menu()
