@@ -1,0 +1,140 @@
+const fs = require('fs');
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+let produtos = [];
+let cadastros = [];
+let historicoCompras = [];
+
+function carregamentoDados() {
+    try {
+        if (fs.existsSync('produtos.txt')) {
+            produtos = fs.readFileSync('produtos.txt', 'utf8').trim().split('\n').map(line => {
+                const [nome, preco] = line.split(' - ');
+                return { nome, preco: parseFloat(preco) };
+            });
+        }
+        if (fs.existsSync('cadastros.txt')) {
+            cadastros = fs.readFileSync('cadastros.txt', 'utf8').trim().split('\n').map(line => {
+                const [nome, email, senha] = line.split(' - ');
+                return { nome, email, senha };
+            });
+        }
+        if (fs.existsSync('historicoCompras.txt')) {
+            historicoCompras = fs.readFileSync('historicoCompras.txt', 'utf8').trim().split('\n');
+        }
+    } catch (error) {
+        console.log('Ocorreu um erro ao carregar dados:', error);
+    }
+}
+
+function salvarDados() {
+    const produtosData = produtos.map(produto => `${produto.nome} - ${produto.preco.toFixed(2)}`).join('\n');
+    fs.writeFileSync('produtos.txt', produtosData);
+
+    const cadastrosData = cadastros.map(cadastro => `${cadastro.nome} - ${cadastro.email} - ${cadastro.senha}`).join('\n');
+    fs.writeFileSync('cadastros.txt', cadastrosData);
+
+    const historicoData = historicoCompras.join('\n');
+    fs.writeFileSync('historicoCompras.txt', historicoData);
+}
+
+function cadastrarCliente(callback) {
+    rl.question('Nome: ', (nome) => {
+        rl.question('Email: ', (email) => {
+            rl.question('CPF: ', (cpf) => {
+                cadastros.push({ nome, email, cpf });
+                callback({ nome, email });
+            });
+        });
+    });
+}
+
+function loginCliente(callback) {
+    rl.question('Email: ', (email) => {
+        rl.question('CPF: ', (cpf) => {
+            const cliente = cadastros.find(c => c.email === email && c.cpf === cpf);
+            if (cliente) {
+                console.log(`Olá, ${cliente.nome}!`);
+                callback(cliente);
+            } else {
+                console.log('Email ou CPF não correspondem.');
+                menu(); // Assumindo que você tem uma função 'menu' definida em outro lugar.
+            }
+        });
+    });
+}
+
+const listaDeProdutos = [
+    { codigo: '1', nome: 'Banana', preco: 5.33 },
+    { codigo: '2', nome: 'Macarrão', preco: 4.51 },
+    { codigo: '3', nome: 'Arroz', preco: 12.00 },
+    { codigo: '4', nome: 'Maçã', preco: 13.98 },
+    { codigo: '5', nome: 'Contra filé', preco: 59.98 },
+    { codigo: '6', nome: 'Feijão', preco: 22.50 },
+    { codigo: '7', nome: 'Corote', preco: 3.50 },
+    { codigo: '8', nome: 'Nugget (20uni)', preco: 12.50 },
+    {codigo:  '9', nome: 'Leite', preco: 6.20},
+    {codigo:  '10', nome: 'Pão', preco: 7.80},
+    {codigo:  '11', nome: 'Manteiga', preco: 8.90},
+    {codigo:  '12', nome: 'Ovos (dúzia)', preco: 10.00},
+    {codigo:  '13', nome: 'Açúcar 1kg', preco: 4.70},
+    {codigo:  '14', nome: 'Café 1kg', preco: 15.00},
+    {codigo:  '15', nome: 'Uliana', preco: 5.60},
+    {codigo:  '16', nome: 'Frango (asinha) kg', preco: 15.30},
+    {codigo:  '17', nome: 'Batata kg', preco: 3.99},
+    {codigo:  '18', nome: 'Tomate kg', preco: 6.45},
+    
+];
+
+let valorTotal = 0;
+let carrinho = {};
+
+function perguntarProduto() {
+    rl.question('Digite o codigo do produto (ou "T" para terminar): ', (produto) => {
+        if (produto.toLowerCase() === 't') {
+            if (Object.keys(carrinho).length > 0) {
+                console.log('Produtos no carrinho:');
+                for (let [nome, { preco, quantidade }] of Object.entries(carrinho)) {
+                    console.log(`${nome} (s) R$ ${preco.toFixed(2)} (${quantidade})`);
+                }
+                console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
+            } else {
+                console.log('Nenhum produto foi inserido.');
+            }
+            rl.close();
+        } else {
+            if (produto in listaDeProdutos) {
+                rl.question('Quantidade: ', (quantidade) => {
+                    const quantNumerica = parseInt(quantidade, 10);
+                    if (isNaN(quantNumerica) || quantNumerica <= 0) {
+                        console.log('Quantidade inválida. Tente novamente.');
+                        perguntarProduto();
+                        return;
+                    }
+                    if (carrinho[produto]) {
+                        carrinho[produto].quantidade += quantNumerica;
+                    } else {
+                        carrinho[produto] = {
+                            preco: listaDeProdutos[produto],
+                            quantidade: quantNumerica
+                        };
+                    }
+                    valorTotal += listaDeProdutos[produto] * quantNumerica;
+                    console.log(`${quantNumerica} ${produto}(s) adicionado(s) ao carrinho`);
+                    perguntarProduto();
+                });
+            } else {
+                console.log('Produto não encontrado.');
+                perguntarProduto();
+            }
+        }
+    });
+}
+
+carregamentoDados();
+perguntarProduto();
