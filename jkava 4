@@ -94,21 +94,31 @@ const listaDeProdutos = [
 let valorTotal = 0;
 let carrinho = {};
 
+function mostrarListaDeProdutos() {
+    console.log('Estes são os produtos disponíveis:');
+    listaDeProdutos.forEach(produto => {
+        console.log(`${produto.codigo}: ${produto.nome} - R$ ${produto.preco.toFixed(2)}`);
+    });
+}
+
 function perguntarProduto() {
-    rl.question('Digite o codigo do produto (ou "T" para terminar): ', (produto) => {
-        if (produto.toLowerCase() === 't') {
+    rl.question('Digite o código do produto (ou "T" para terminar): ', (codigo) => {
+        if (codigo.toLowerCase() === 't') {
             if (Object.keys(carrinho).length > 0) {
                 console.log('Produtos no carrinho:');
-                for (let [nome, { preco, quantidade }] of Object.entries(carrinho)) {
-                    console.log(`${nome} (s) R$ ${preco.toFixed(2)} (${quantidade})`);
+                for (let [codigo, { nome, preco, quantidade }] of Object.entries(carrinho)) {
+                    console.log(`${codigo}: ${nome} - R$ ${preco.toFixed(2)} (${quantidade})`);
                 }
                 console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
+                historicoCompras.push(`Compra realizada: ${JSON.stringify(carrinho)}`);
+                salvarDados(); // Salvar dados após finalizar a compra
             } else {
                 console.log('Nenhum produto foi inserido.');
             }
             rl.close();
         } else {
-            if (produto in listaDeProdutos) {
+            const produto = listaDeProdutos.find(p => p.codigo === codigo);
+            if (produto) {
                 rl.question('Quantidade: ', (quantidade) => {
                     const quantNumerica = parseInt(quantidade, 10);
                     if (isNaN(quantNumerica) || quantNumerica <= 0) {
@@ -116,20 +126,21 @@ function perguntarProduto() {
                         perguntarProduto();
                         return;
                     }
-                    if (carrinho[produto]) {
-                        carrinho[produto].quantidade += quantNumerica;
+                    if (carrinho[codigo]) {
+                        carrinho[codigo].quantidade += quantNumerica;
                     } else {
-                        carrinho[produto] = {
-                            preco: listaDeProdutos[produto],
+                        carrinho[codigo] = {
+                            nome: produto.nome,
+                            preco: produto.preco,
                             quantidade: quantNumerica
                         };
                     }
-                    valorTotal += listaDeProdutos[produto] * quantNumerica;
-                    console.log(`${quantNumerica} ${produto}(s) adicionado(s) ao carrinho`);
+                    valorTotal += produto.preco * quantNumerica;
+                    console.log(`${quantNumerica} ${produto.nome}(s) adicionado(s) ao carrinho`);
                     perguntarProduto();
                 });
             } else {
-                console.log('Produto não encontrado.');
+                console.log('Código do produto não encontrado.');
                 perguntarProduto();
             }
         }
@@ -137,4 +148,15 @@ function perguntarProduto() {
 }
 
 carregamentoDados();
+mostrarListaDeProdutos(); // Mostra a lista de produtos antes de iniciar o processo de compra
 perguntarProduto();
+
+function formaPagamento(callback) {
+    console.log("Formas de pagamento disponíveis:");
+    console.log("Cartão Débito:");
+    console.log("Cartão Crédito:");
+    console.log("Pix:");
+    console.log("Dinheiro:");
+    console.log("Caderninho:");
+    rl.question
+}
