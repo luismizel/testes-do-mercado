@@ -1,0 +1,180 @@
+const fs = require('fs');
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+let produtos = [];
+let cadastros = [];
+let historicoCompras = [];
+
+function carregamentoDados() {
+    try {
+        if (fs.existsSync('produtos.txt')) {
+            produtos = fs.readFileSync('produtos.txt', 'utf8').trim().split('\n').map(line => {
+                const [codigo, nome, preco] = line.split(' - ');
+                return { codigo, nome, preco: parseFloat(preco) };
+            });
+        }
+        if (fs.existsSync('cadastros.txt')) {
+            cadastros = fs.readFileSync('cadastros.txt', 'utf8').trim().split('\n').map(line => {
+                const [nome, email, cpf] = line.split(' - ');
+                return { nome, email, cpf };
+            });
+        }
+        if (fs.existsSync('historicoCompras.txt')) {
+            historicoCompras = fs.readFileSync('historicoCompras.txt', 'utf8').trim().split('\n');
+        }
+    } catch (error) {
+        console.log('Ocorreu um erro ao carregar dados:', error);
+    }
+}
+
+function salvarDados() {
+    const produtosData = produtos.map(produto => `${produto.codigo} - ${produto.nome} - ${produto.preco.toFixed(2)}`).join('\n');
+    fs.writeFileSync('produtos.txt', produtosData);
+
+    const cadastrosData = cadastros.map(cadastro => `${cadastro.nome} - ${cadastro.email} - ${cadastro.cpf}`).join('\n');
+    fs.writeFileSync('cadastros.txt', cadastrosData);
+
+    const historicoData = historicoCompras.join('\n');
+    fs.writeFileSync('historicoCompras.txt', historicoData);
+}
+
+function cadastrarCliente(callback) {
+    rl.question('Nome: ', (nome) => {
+        rl.question('Email: ', (email) => {
+            rl.question('CPF: ', (cpf) => {
+                cadastros.push({ nome, email, cpf });
+                callback({ nome, email });
+            });
+        });
+    });
+}
+
+function loginCliente(callback) {
+    rl.question('Email: ', (email) => {
+        rl.question('CPF: ', (cpf) => {
+            const cliente = cadastros.find(c => c.email === email && c.cpf === cpf);
+            if (cliente) {
+                console.log(`Olá, ${cliente.nome}!`);
+                callback(cliente);
+            } else {
+                console.log('Email ou CPF não correspondem.');
+                menu(); // Assumindo que você tem uma função 'menu' definida em outro lugar.
+            }
+        });
+    });
+}
+
+const listaDeProdutos = [
+    { codigo: '1', nome: 'Banana', preco: 5.33 },
+    { codigo: '2', nome: 'Macarrão', preco: 4.51 },
+    { codigo: '3', nome: 'Arroz', preco: 12.00 },
+    { codigo: '4', nome: 'Maçã', preco: 13.98 },
+    { codigo: '5', nome: 'Contra filé', preco: 59.98 },
+    { codigo: '6', nome: 'Feijão', preco: 22.50 },
+    { codigo: '7', nome: 'Corote', preco: 3.50 },
+    { codigo: '8', nome: 'Nugget (20uni)', preco: 12.50 },
+    {codigo:  '9', nome: 'Leite', preco: 6.20},
+    {codigo:  '10', nome: 'Pão', preco: 7.80},
+    {codigo:  '11', nome: 'Manteiga', preco: 8.90},
+    {codigo:  '12', nome: 'Ovos (dúzia)', preco: 10.00},
+    {codigo:  '13', nome: 'Açúcar 1kg', preco: 4.70},
+    {codigo:  '14', nome: 'Café 1kg', preco: 15.00},
+    {codigo:  '15', nome: 'Uliana', preco: 5.60},
+    {codigo:  '16', nome: 'Frango (asinha) kg', preco: 15.30},
+    {codigo:  '17', nome: 'Batata kg', preco: 3.99},
+    {codigo:  '18', nome: 'Tomate kg', preco: 6.45},
+    
+];
+
+let valorTotal = 0;
+let carrinho = {};
+
+function mostrarListaDeProdutos() {
+    console.log('Estes são os produtos disponíveis:');
+    listaDeProdutos.forEach(produto => {
+        console.log(`${produto.codigo}: ${produto.nome} - R$ ${produto.preco.toFixed(2)}`);
+    });
+}
+
+function perguntarProduto() {
+    rl.question('Digite o código do produto (ou "T" para terminar): ', (codigo) => {
+        if (codigo.toLowerCase() === 't') {
+            if (Object.keys(carrinho).length > 0) {
+                console.log('Produtos no carrinho:');
+                for (let [codigo, { nome, preco, quantidade }] of Object.entries(carrinho)) {
+                    console.log(`${codigo}: ${nome} - R$ ${preco.toFixed(2)} (${quantidade})`);
+                }
+                console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
+                historicoCompras.push(`Compra realizada: ${JSON.stringify(carrinho)}`);
+                salvarDados(); // Salvar dados após finalizar a compra
+            } else {
+                console.log('Nenhum produto foi inserido.');
+            }
+            rl.close();
+        } else {
+            const produto = listaDeProdutos.find(p => p.codigo === codigo);
+            if (produto) {
+                rl.question('Quantidade: ', (quantidade) => {
+                    const quantNumerica = parseInt(quantidade, 10);
+                    if (isNaN(quantNumerica) || quantNumerica <= 0) {
+                        console.log('Quantidade inválida. Tente novamente.');
+                        perguntarProduto();
+                        return;
+                    }
+                    if (carrinho[codigo]) {
+                        carrinho[codigo].quantidade += quantNumerica;
+                    } else {
+                        carrinho[codigo] = {
+                            nome: produto.nome,
+                            preco: produto.preco,
+                            quantidade: quantNumerica
+                        };
+                    }
+                    valorTotal += produto.preco * quantNumerica;
+                    console.log(`${quantNumerica} ${produto.nome}(s) adicionado(s) ao carrinho`);
+                    perguntarProduto();
+                });
+            } else {
+                console.log('Código do produto não encontrado.');
+                perguntarProduto();
+            }
+        }
+    });
+}
+
+carregamentoDados();
+mostrarListaDeProdutos(); // Mostra a lista de produtos antes de iniciar o processo de compra
+perguntarProduto();
+
+function formaPagamento(callback) {
+    console.log("Formas de pagamento disponíveis:");
+    console.log("1- Cartão Débito:");
+    console.log("2- Cartão Crédito:");
+    console.log("3- Pix:");
+    console.log("4- Dinheiro:");
+    console.log("5- Caderninho:");
+    rl.question("escolha a forma de pagamento: ", (escolha) => {
+        switch (escolha) {
+        case "1":
+            callback("Cartão Débito");
+            break;
+        case "2":
+            callback("Cartão Crédito");
+            break;
+        case "3":
+            callback("Pix");
+            break;
+        case "4":
+            callback("Dinheiro");
+        case "5":
+            console.log("O pagamento deve ser efetuado no prazo de 1 mês. Confirme um dia para o pagamento abaixo")
+            rl.question()
+            
+        }
+    });
+}
