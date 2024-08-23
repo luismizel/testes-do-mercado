@@ -191,5 +191,32 @@ function menu() {
     console.log('2- fazer login em uma conta existente');
     console.log('3- sair');
 
-    rl.question('escolha uma opção: ', opcao)
+    rl.question('escolha uma opção: ', opcao => {
+        switch (opcao) {
+            case '1':
+                cadastrarCliente(cliente =>{
+                    console.log(`Cadastro realizado com sucesso. Bem Vindo, ${cliente.nome}`);
+                    menuCompras();
+             });
+             break;
+             case '2':
+                loginCliente(cliente => {
+                    menuCompras();
+             });
+             break;
+             case '3':
+                rl.close();
+                break;
+             default:
+                console.log('opição  inválida.');
+                menu();
+            break;
+        }
+    });
+}
+
+function menuCompras() {
+    console.log('Oquye você goataeria defazer')
+    console.log('1- Realizar compra')
+    console.log('2- sair')
 }
