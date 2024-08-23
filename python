@@ -1,10 +1,24 @@
+import re
+import os
+
 produtos = {}
-Lista_De_Produtos = {'Banana': 5.33, 'Macarrão': 4.51, 'Arroz': 12.00, 'Maçã': 13.98, 'Contra filé': 59.98, 'Feijão': 22.50}
+Lista_De_Produtos = {'Banana (kg)': 5.33, 'Macarrão': 4.51, 'Arroz (1kg)': 12.00, 'Maçã (kg)': 13.98, 'Contra filé (kg)': 59.98, 'Feijão (1kg)': 22.50}
+
+# Função para validar email
+def validar_email(email):
+    padrao = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if re.match(padrao, email):
+        return True
+    else:
+        print("Email inválido! Por favor, insira um email válido.")
+        return False
+
+# Função principal que exibe o menu
 def home():
     nome_mercado = "Bem Vindo ao Mercado Clube da Esquina"
     print(f"\n{nome_mercado}")
 
-    laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Ver Catálogo . 4. Adicionar produto ao carrinho.\n")
+    laal = input("1. Criar conta. 2. Já tenho uma conta. 3. Ver Catálogo. 4. Adicionar produto ao carrinho.\n")
     if laal == "1":
         op1()
     elif laal == "2":
@@ -15,90 +29,126 @@ def home():
         op4()
     else:
         home()
-        
+
+# Função para criar uma conta
 def op1():
+    if not os.path.exists('contas.txt'):
+        with open('contas.txt', 'w') as arq:
+            pass
+
     while True: 
-        print("Vamos criar sua conta\n")
+        print("Criar conta\n")
         nome = input("Digite seu nome:\n")
         idade = input("Digite sua idade:\n")
-        if idade.isdigit():
-            idade = int(idade)
-        else:
-            print("(idade não possui letras)\n")
+        if not idade.isdigit():
+            print("(idade não pode conter letras)\n")
             continue
-        cpf = input("Qual o seu CPF:\n")
-        if cpf.isdigit():
-            if len(cpf) != 11:
-                print("CPF inválido! O CPF deve ter 11 dígitos.")
-                continue
-        else:
-            print("(somente números)")
+        idade = int(idade)
+        
+        cpf = input("Digite seu CPF:\n")
+        if not (cpf.isdigit() and len(cpf) == 11):
+            print("CPF inválido! O CPF deve ter 11 dígitos numéricos.")
             continue
-        email = input("Informe o seu Email:\n")
+        
+        email = input("digite o seu Email:\n")
+        if not validar_email(email):
+            continue
+        
+        senha = input("Crie uma senha:\n")
+        
+        # Verifica se a conta já existe
         with open('contas.txt', 'r') as arq:
             if f"{cpf}, " in arq.read():
                 print("Conta já existe!")
-                continue;
+                continue
+        
         con = input("Confirmar? (s/n):\n")
-        if con == "n":
-            cancelamento = "Você cancelou o procedimento"
-            print(f"{cancelamento}")
+        if con.lower() == "n":
+            print("Você cancelou o procedimento.")
             home()
-        elif con == "s":
-            with open('contas.txt', 'a') as arq:
-                arq.write(f'{nome}, {idade}, {cpf}, {email}\n')
-            sucesso = "Parabéns, você concluiu seu registro"
-            print(f"{sucesso}")
+        elif con.lower() == "s":
+            try:
+                with open('contas.txt', 'a') as arq:
+                    arq.write(f'{nome}, {idade}, {cpf}, {email}, {senha}\n')
+                print("Parabéns, você concluiu seu registro.")
+            except Exception as e:
+                print(f"Erro ao salvar os dados: {e}")
             home()
 
+# Função para efetuar login
 def op2():
-    arq = open('contas.txt')
-    efetuar_login = ("efetue seu login")
-    print (f"{efetuar_login}")
-    nome_login = input('Digite o nome do usuario cadastrado: ')
-    cpf_login = input('Digite o seu cpf cadastrado: ')
-    with open('contas.txt', 'r') as arq:
-        for linha in arq:
-            dados = linha.strip().split(', ')
-            if dados[0] == nome_login and dados[2] == cpf_login:
-                print("Login efetuado com sucesso!")
-                #oi luis, aqui você pode colocar alguma coisa pfra continuar o login
-                home()
-        else:
-            print("Conta não encontrada ou CPF incorreto!")
-            home()
+    print("Fazer login")
+    nome_login = input('Digite o nome do usuário: ')
+    cpf_login = input('Digite o seu CPF: ')
+    senha_login = input('Digite sua senha: ')
+    
+    try:
+        with open('contas.txt', 'r') as arq:
+            for linha in arq:
+                dados = linha.strip().split(', ')
+                if dados[0] == nome_login and dados[2] == cpf_login and dados[4] == senha_login:
+                    print("Login efetuado com sucesso!")
+                    home()
+                    return
+            print("Conta não encontrada, CPF ou senha incorretos!")
+    except Exception as e:
+        print(f"Erro ao tentar fazer login: {e}")
+    
+    home()
 
+# Função para exibir o catálogo de produtos
 def op3():
     print("Opção 3 selecionada: Ver catálogo\n")
     for key, value in Lista_De_Produtos.items():
-        print(f"{key}: {value}")
+        print(f"{key}: {value:.2f}€")
     home()
+
+# Função para gerenciar o carrinho de compras
 def op4():
-    print("Opção 4 selecionada: Adicionar/Excluir produto produto ao carrinho")
+    print("Opção 4 selecionada: Adicionar/Excluir produto ao carrinho")
     while True:
-        produto = input("Adicione um produto, ('E' para exluir, 'V' para voltar e 'T' para terminar):\n")
+        produto = input("Adicione um produto, ('E' para excluir, 'V' para voltar e 'T' para terminar):\n")
+        
         if produto.upper() == "E":
+            if not produtos:
+                print("Seu carrinho está vazio.")
+                continue
             print(produtos)
             while True:
-                exc = input("Excluir produtos(ou 'V' para voltar):\n")
+                exc = input("Excluir produtos (ou 'V' para voltar):\n")
                 if exc.capitalize() in produtos:
                     del produtos[exc.capitalize()]
                     print("Seu carrinho:")
                     for key, value in produtos.items():
-                        print(f"{key}: {value}")
+                        print(f"{key}: {value[0]:.2f}€ - Quantidade: {value[1]}")
                 elif exc.upper() == "V":
                     break
+                else:
+                    print("Produto não encontrado no carrinho.")
+        
         elif produto.capitalize() in Lista_De_Produtos:
-            produtos[produto.capitalize()] = Lista_De_Produtos[produto.capitalize()]
-            print("SUA LISTA:\n")
-            for key, value in produtos.items():
-                print(f"{key}: {value}")
+            quantidade = input("Unidades\n")
+            if quantidade.isdigit():
+                quantidade = int(quantidade)
+                if produto.capitalize() in produtos:
+                    produtos[produto.capitalize()][1] += quantidade
+                else:
+                    produtos[produto.capitalize()] = [Lista_De_Produtos[produto.capitalize()], quantidade]
+                print("SUA LISTA:\n")
+                for key, value in produtos.items():
+                    print(f"{key}: {value[0]:.2f}€ - Quantidade: {value[1]}")
+            else:
+                print("Quantidade inválida. Por favor, insira um número.")
+        
         elif produto.upper() == "V":
             home()
+        
         elif produto.upper() == "T":
-            total = sum(produtos.values())
-            print(f"Total: {total: .2f}")
+            total = sum([value[0] * value[1] for value in produtos.values()])
+            print(f"Total: {total:.2f}€")
             home()
+        
         else:
             print("\nPRODUTO NÃO CATALOGADO\n")
+
 home()
