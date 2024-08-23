@@ -148,7 +148,7 @@ function perguntarProduto() {
 }
 
 carregamentoDados();
-mostrarListaDeProdutos(); // Mostra a lista de produtos antes de iniciar o processo de compra
+mostrarListaDeProdutos(); 
 perguntarProduto();
 
 function formaPagamento(callback) {
@@ -173,8 +173,23 @@ function formaPagamento(callback) {
             callback("Dinheiro");
         case "5":
             console.log("O pagamento deve ser efetuado no prazo de 1 mês. Confirme um dia para o pagamento abaixo")
-            rl.question()
+            rl.question("Qual o dia que o pagamento será realizado? (DD/MM/AAAA): ", (dia_pagamento) =>{
+                callback("Caderninho")
+            });
+            break;
+        default:
+            console.log("Opção não reconhcida. Tente uma opção existente")
+            selecionarPagamento(callback)
             
         }
     });
+}
+
+function menu() {
+    console.log("Bem Vindo ao Mercado Clube da esquina, oque você gostaria de fazer hoje")
+    console.log('1- cadastrar uma nova conta');
+    console.log('2- fazer login em uma conta existente');
+    console.log('3- sair');
+
+    rl.question('escolha uma opção: ', opcao)
 }
