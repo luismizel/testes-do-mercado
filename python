@@ -15,25 +15,41 @@ def home():
         op4()
     else:
         home()
-
+        
 def op1():
-    print("Vamos criar sua conta\n")
-    nome = input("Digite seu nome:\n")
-    idade = input("Digite sua idade:\n")
-    cpf = input("Qual o seu CPF:\n")
-    email = input("Informe o seu Email:\n")
-    
-    con = input("Confirmar? (s/n)\n")
-    if con == "n":
-        cancelamento = "Você cancelou o procedimento"
-        print(f"{cancelamento}")
-        home()
-    elif con == "s":
-        with open('contas.txt', 'a') as arq:
-            arq.write(f'{nome}, {idade}, {cpf}, {email}\n')
-        sucesso = "Parabéns, você concluiu seu registro"
-        print(f"{sucesso}")
-        home()
+    while True: 
+        print("Vamos criar sua conta\n")
+        nome = input("Digite seu nome:\n")
+        idade = input("Digite sua idade:\n")
+        if idade.isdigit():
+            idade = int(idade)
+        else:
+            print("(idade não possui letras)\n")
+            continue
+        cpf = input("Qual o seu CPF:\n")
+        if cpf.isdigit():
+            if len(cpf) != 11:
+                print("CPF inválido! O CPF deve ter 11 dígitos.")
+                continue
+        else:
+            print("(somente números)")
+            continue
+        email = input("Informe o seu Email:\n")
+        with open('contas.txt', 'r') as arq:
+            if f"{cpf}, " in arq.read():
+                print("Conta já existe!")
+                continue;
+        con = input("Confirmar? (s/n):\n")
+        if con == "n":
+            cancelamento = "Você cancelou o procedimento"
+            print(f"{cancelamento}")
+            home()
+        elif con == "s":
+            with open('contas.txt', 'a') as arq:
+                arq.write(f'{nome}, {idade}, {cpf}, {email}\n')
+            sucesso = "Parabéns, você concluiu seu registro"
+            print(f"{sucesso}")
+            home()
 
 def op2():
     arq = open('contas.txt')
@@ -41,8 +57,16 @@ def op2():
     print (f"{efetuar_login}")
     nome_login = input('Digite o nome do usuario cadastrado: ')
     cpf_login = input('Digite o seu cpf cadastrado: ')
-
-    home()
+    with open('contas.txt', 'r') as arq:
+        for linha in arq:
+            dados = linha.strip().split(', ')
+            if dados[0] == nome_login and dados[2] == cpf_login:
+                print("Login efetuado com sucesso!")
+                #oi luis, aqui você pode colocar alguma coisa pfra continuar o login
+                home()
+        else:
+            print("Conta não encontrada ou CPF incorreto!")
+            home()
 
 def op3():
     print("Opção 3 selecionada: Ver catálogo\n")
