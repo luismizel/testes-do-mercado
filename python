@@ -6,8 +6,7 @@ Lista_De_Produtos = {'Banana': 5.33, 'Macarrão': 4.51, 'Arroz ': 12.00, 'Maçã
 
 # Função para validar email
 def validar_email(email):
-    padrao = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-    if re.match(padrao, email):
+    if re.match(email):
         return True
     else:
         print("Email inválido! Por favor, insira um email válido.")
