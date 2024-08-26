@@ -43,11 +43,28 @@ function salvarDados() {
     fs.writeFileSync('historicoCompras.txt', historicoData);
 }
 
+function validarCPF(cpf) {
+    return /^\d{11}$/.test(cpf);
+}
+
+function validarEmail(email) {
+    return email.endsWith('@gmail.com') || email.endsWith('@hotmail.com');
+}
+
 function cadastrarCliente(callback) {
     rl.question('Nome: ', (nome) => {
         rl.question('Email: ', (email) => {
+            if (!validarEmail(email)) {
+                console.log('Email inválido. Deve terminar com "@gmail.com" ou "@hotmail.com".');
+                return cadastrarCliente(callback);
+            }
             rl.question('CPF: ', (cpf) => {
+                if (!validarCPF(cpf)) {
+                    console.log('CPF inválido. Deve conter exatamente 11 dígitos numéricos.');
+                    return cadastrarCliente(callback);
+                }
                 cadastros.push({ nome, email, cpf });
+                salvarDados();
                 callback({ nome, email });
             });
         });
@@ -63,7 +80,7 @@ function loginCliente(callback) {
                 callback(cliente);
             } else {
                 console.log('Email ou CPF não correspondem.');
-                menu(); // Assumindo que você tem uma função 'menu' definida em outro lugar.
+                menu();
             }
         });
     });
@@ -78,17 +95,16 @@ const listaDeProdutos = [
     { codigo: '6', nome: 'Feijão', preco: 22.50 },
     { codigo: '7', nome: 'Corote', preco: 3.50 },
     { codigo: '8', nome: 'Nugget (20uni)', preco: 12.50 },
-    {codigo:  '9', nome: 'Leite', preco: 6.20},
-    {codigo:  '10', nome: 'Pão', preco: 7.80},
-    {codigo:  '11', nome: 'Manteiga', preco: 8.90},
-    {codigo:  '12', nome: 'Ovos (dúzia)', preco: 10.00},
-    {codigo:  '13', nome: 'Açúcar 1kg', preco: 4.70},
-    {codigo:  '14', nome: 'Café 1kg', preco: 15.00},
-    {codigo:  '15', nome: 'Uliana', preco: 5.60},
-    {codigo:  '16', nome: 'Frango (asinha) kg', preco: 15.30},
-    {codigo:  '17', nome: 'Batata kg', preco: 3.99},
-    {codigo:  '18', nome: 'Tomate kg', preco: 6.45},
-    
+    { codigo: '9', nome: 'Leite', preco: 6.20 },
+    { codigo: '10', nome: 'Pão (kg)', preco: 4.50 },
+    { codigo: '11', nome: 'Manteiga', preco: 8.90 },
+    { codigo: '12', nome: 'Ovos (dúzia)', preco: 10.00 },
+    { codigo: '13', nome: 'Açúcar 1kg', preco: 4.70 },
+    { codigo: '14', nome: 'Café 1kg', preco: 15.00 },
+    { codigo: '15', nome: 'Uliana', preco: 5.60 },
+    { codigo: '16', nome: 'Frango (asinha) kg', preco: 15.30 },
+    { codigo: '17', nome: 'Batata kg', preco: 3.99 },
+    { codigo: '18', nome: 'Tomate kg', preco: 6.45 },
 ];
 
 let valorTotal = 0;
@@ -111,11 +127,15 @@ function perguntarProduto() {
                 }
                 console.log(`Valor total: R$ ${valorTotal.toFixed(2)}`);
                 historicoCompras.push(`Compra realizada: ${JSON.stringify(carrinho)}`);
-                salvarDados(); // Salvar dados após finalizar a compra
+                formaPagamento(metodo => {
+                    console.log(`Pagamento realizado com ${metodo}. Obrigado por comprar conosco!`);
+                    salvarDados();
+                    rl.close();
+                });
             } else {
                 console.log('Nenhum produto foi inserido.');
+                rl.close();
             }
-            rl.close();
         } else {
             const produto = listaDeProdutos.find(p => p.codigo === codigo);
             if (produto) {
@@ -147,76 +167,92 @@ function perguntarProduto() {
     });
 }
 
-carregamentoDados();
-mostrarListaDeProdutos(); 
-perguntarProduto();
-
 function formaPagamento(callback) {
     console.log("Formas de pagamento disponíveis:");
-    console.log("1- Cartão Débito:");
-    console.log("2- Cartão Crédito:");
-    console.log("3- Pix:");
-    console.log("4- Dinheiro:");
-    console.log("5- Caderninho:");
-    rl.question("escolha a forma de pagamento: ", (escolha) => {
+    console.log("1- Cartão Débito");
+    console.log("2- Cartão Crédito");
+    console.log("3- Pix");
+    console.log("4- Dinheiro");
+    console.log("5- Caderninho");
+    rl.question("Escolha a forma de pagamento: ", (escolha) => {
         switch (escolha) {
-        case "1":
-            callback("Cartão Débito");
-            break;
-        case "2":
-            callback("Cartão Crédito");
-            break;
-        case "3":
-            callback("Pix");
-            break;
-        case "4":
-            callback("Dinheiro");
-        case "5":
-            console.log("O pagamento deve ser efetuado no prazo de 1 mês. Confirme um dia para o pagamento abaixo")
-            rl.question("Qual o dia que o pagamento será realizado? (DD/MM/AAAA): ", (dia_pagamento) =>{
-                callback("Caderninho")
-            });
-            break;
-        default:
-            console.log("Opção não reconhcida. Tente uma opção existente")
-            selecionarPagamento(callback)
-            
+            case "1":
+                callback("Cartão Débito");
+                break;
+            case "2":
+                callback("Cartão Crédito");
+                break;
+            case "3":
+                callback("Pix");
+                break;
+            case "4":
+                callback("Dinheiro");
+                break;
+            case "5":
+                console.log("O pagamento deve ser efetuado no prazo de 1 mês.");
+                rl.question("Qual o dia que o pagamento será realizado? (DD/MM/AAAA): ", (dia_pagamento) => {
+                    callback(`Caderninho, com pagamento agendado para ${dia_pagamento}`);
+                });
+                break;
+            default:
+                console.log("Opção não reconhecida. Tente uma opção existente.");
+                formaPagamento(callback);
+                break;
         }
     });
 }
 
 function menu() {
-    console.log("Bem Vindo ao Mercado Clube da esquina, oque você gostaria de fazer hoje")
-    console.log('1- cadastrar uma nova conta');
-    console.log('2- fazer login em uma conta existente');
-    console.log('3- sair');
+    console.log("Bem-vindo ao Mercado Clube da Esquina! O que você gostaria de fazer hoje?");
+    console.log('1- Cadastrar uma nova conta');
+    console.log('2- Fazer login em uma conta existente');
+    console.log('3- Sair');
 
-    rl.question('escolha uma opção: ', opcao => {
+    rl.question('Escolha uma opção: ', opcao => {
         switch (opcao) {
             case '1':
-                cadastrarCliente(cliente =>{
-                    console.log(`Cadastro realizado com sucesso. Bem Vindo, ${cliente.nome}`);
+                cadastrarCliente(cliente => {
+                    console.log(`Cadastro realizado com sucesso. Bem-vindo, ${cliente.nome}!`);
                     menuCompras();
-             });
-             break;
-             case '2':
+                });
+                break;
+            case '2':
                 loginCliente(cliente => {
                     menuCompras();
-             });
-             break;
-             case '3':
+                });
+                break;
+            case '3':
                 rl.close();
                 break;
-             default:
-                console.log('opição  inválida.');
+            default:
+                console.log('Opção inválida.');
                 menu();
-            break;
+                break;
         }
     });
 }
 
 function menuCompras() {
-    console.log('Oquye você goataeria defazer')
-    console.log('1- Realizar compra')
-    console.log('2- sair')
+    console.log("O que você gostaria de fazer?");
+    console.log("1- Realizar compra");
+    console.log("2- Sair");
+
+    rl.question('Escolha uma opção: ', opcao => {
+        switch (opcao) {
+            case '1':
+                mostrarListaDeProdutos();
+                perguntarProduto();
+                break;
+            case '2':
+                rl.close();
+                break;
+            default:
+                console.log('Opção inválida.');
+                menuCompras();
+                break;
+        }
+    });
 }
+
+carregamentoDados();
+menu();
