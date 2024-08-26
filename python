@@ -2,7 +2,7 @@ import re
 import os
 
 produtos = {}
-Lista_De_Produtos = {'Banana (kg)': 5.33, 'Macarrão': 4.51, 'Arroz (1kg)': 12.00, 'Maçã (kg)': 13.98, 'Contra filé (kg)': 59.98, 'Feijão (1kg)': 22.50}
+Lista_De_Produtos = {'Banana': 5.33, 'Macarrão': 4.51, 'Arroz ': 12.00, 'Maçã ': 13.98, 'Contra filé ': 59.98, 'Feijão ': 22.50}
 
 # Função para validar email
 def validar_email(email):
